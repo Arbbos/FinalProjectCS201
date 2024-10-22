@@ -1,3 +1,5 @@
+package initialProject1;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -67,7 +69,11 @@ public class Main {
 
     private static void addProductToPanel(JPanel mainPanel, InventorySystem.ProductTracker product) {
         JPanel productPanel = new JPanel(new BorderLayout());
-        JLabel productImage = new JLabel("Image", SwingConstants.CENTER); // Placeholder for the image
+        Image img = new ImageIcon(Main.class.getResource("/PT01.jpg")).getImage(); 
+        Image scaledImg = img.getScaledInstance(100, 100, Image.SCALE_SMOOTH); 
+        ImageIcon productImageIcon = new ImageIcon(scaledImg);
+        
+        JLabel productImage = new JLabel(productImageIcon, SwingConstants.CENTER);
         JLabel productNameLabel = new JLabel(product.getName(), SwingConstants.CENTER);
         JLabel productIDLabel = new JLabel("ID: " + product.getProductID(), SwingConstants.CENTER);
         JLabel stockLabel = new JLabel("Stock: " + product.getStockLevel(), SwingConstants.CENTER);
