@@ -1,1 +1,47 @@
+package Gawanibrian;
 
+import java.util.List;
+
+public class OrderFulfillment {
+    private String orderID;
+    private String productID;
+    private int quantity;
+    private String status; // Status of the order (e.g., Processing, Shipped, Delivered)
+    private InventorySystem inventorySystem;
+
+    // Constructor
+    public OrderFulfillment(String orderID, String productID, int quantity, InventorySystem inventorySystem) {
+        this.orderID = orderID;
+        this.productID = productID;
+        this.quantity = quantity;
+        this.status = "Processing";
+        this.inventorySystem = inventorySystem;
+    }
+
+    // Update the order status
+    public void updateStatus(String newStatus) {
+        this.status = newStatus;
+    }
+
+    // Process the order and update the inventory
+    public void processOrder() {
+        List<InventorySystem.ProductTracker> productList = inventorySystem.getProductByID(productID);
+        if (productList != null && !productList.isEmpty()) {
+            InventorySystem.ProductTracker product = productList.get(0); // Assuming first product is selected
+            if (product.getStockLevel() >= quantity) {
+                product.setStockLevel(product.getStockLevel() - quantity);
+                System.out.println("Order fulfilled. Product ID: " + productID + ", Quantity: " + quantity);
+                updateStatus("Shipped");
+            } else {
+                System.out.println("Not enough stock to fulfill the order.");
+            }
+        } else {
+            System.out.println("Product not found for the given ID: " + productID);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Order ID: " + orderID + ", Product ID: " + productID + ", Quantity: " + quantity + ", Status: " + status;
+    }
+}
