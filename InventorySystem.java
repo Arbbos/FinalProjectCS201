@@ -1,6 +1,5 @@
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Collection;
 
 public class InventorySystem {
     // Inner class to represent each product's information
@@ -77,29 +76,38 @@ public class InventorySystem {
     }
 
     // HashMap to store products using productID as the key
-    private HashMap<String, List<ProductTracker>> products = new HashMap<>();
+    private HashMap<String, ProductTracker> products = new HashMap<>();
 
     // Method to add a product to the inventory
     public void addProduct(String productID, String name, String category, int stockLevel, String size, String color) {
+        // Check if a product with the same ID already exists
+        if (products.containsKey(productID)) {
+            System.out.println("Product with ID " + productID + " already exists.");
+            return; // Or handle this case as needed (e.g., update stock level)
+        }
+
         ProductTracker product = new ProductTracker(productID, name, category, stockLevel, size, color);
-        products.computeIfAbsent(productID, k -> new ArrayList<>()).add(product);
+        products.put(productID, product);
     }
 
     // Retrieve a product by its ID
-    public List<ProductTracker> getProductByID(String productID) {
+    public ProductTracker getProductByID(String productID) {
         return products.get(productID);
     }
 
     // Retrieve a product by its name
     public ProductTracker getProductByName(String name) {
-        for (List<ProductTracker> productList : products.values()) {
-            for (ProductTracker product : productList) {
-                if (product.getName().equalsIgnoreCase(name)) {
-                    return product;
-                }
+        for (ProductTracker product : products.values()) {
+            if (product.getName().equalsIgnoreCase(name)) {
+                return product;
             }
         }
         return null; // Not found
+    }
+
+    // Method to get all products
+    public Collection<ProductTracker> getProducts() {
+        return products.values(); // Return a Collection of ProductTracker
     }
 
     // List all products in the inventory
@@ -108,10 +116,8 @@ public class InventorySystem {
             System.out.println("No products in inventory.");
             return;
         }
-        for (List<ProductTracker> productList : products.values()) {
-            for (ProductTracker product : productList) {
-                System.out.println(product);
-            }
+        for (ProductTracker product : products.values()) {
+            System.out.println(product);
         }
     }
 }
