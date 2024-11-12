@@ -7,10 +7,10 @@ public class InventorySystem {
         private String productID;
         private String name;
         private int stockLevel;
-        private String size; 
-        private String color; 
-        private String category; // New field for product category
-        private String location; // New field for product location
+        private String size;
+        private String color;
+        private String category;
+        private String location;
 
         public ProductTracker(String productID, String name, String category, int stockLevel, String size, String color) {
             this.productID = productID;
@@ -19,18 +19,17 @@ public class InventorySystem {
             this.size = size;
             this.color = color;
             this.category = category;
-            this.location = determineLocation(category); // Set location based on category
+            this.location = determineLocation(category);
         }
 
-        // Determine the location based on category
         private String determineLocation(String category) {
             switch (category.toLowerCase()) {
                 case "tops":
-                    return "A"; // Specific logic for categorizing tops
+                    return "A";
                 case "pants":
-                    return "B"; // Specific logic for categorizing pants
+                    return "B";
                 default:
-                    return "Unknown Location"; // Fallback if category doesn't match
+                    return "Unknown Location";
             }
         }
 
@@ -63,6 +62,11 @@ public class InventorySystem {
             return location;
         }
 
+        // Setter for stock level
+        public void setStockLevel(int stockLevel) {
+            this.stockLevel = stockLevel;
+        }
+
         @Override
         public String toString() {
             return "\nProduct ID: " + productID + 
@@ -80,10 +84,9 @@ public class InventorySystem {
 
     // Method to add a product to the inventory
     public void addProduct(String productID, String name, String category, int stockLevel, String size, String color) {
-        // Check if a product with the same ID already exists
         if (products.containsKey(productID)) {
             System.out.println("Product with ID " + productID + " already exists.");
-            return; // Or handle this case as needed (e.g., update stock level)
+            return;
         }
 
         ProductTracker product = new ProductTracker(productID, name, category, stockLevel, size, color);
@@ -102,22 +105,11 @@ public class InventorySystem {
                 return product;
             }
         }
-        return null; // Not found
+        return null;
     }
 
-    // Method to get all products
+    // Get all products
     public Collection<ProductTracker> getProducts() {
-        return products.values(); // Return a Collection of ProductTracker
-    }
-
-    // List all products in the inventory
-    public void listAllProducts() {
-        if (products.isEmpty()) {
-            System.out.println("No products in inventory.");
-            return;
-        }
-        for (ProductTracker product : products.values()) {
-            System.out.println(product);
-        }
+        return products.values();
     }
 }
