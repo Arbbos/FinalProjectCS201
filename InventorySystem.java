@@ -1,5 +1,6 @@
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Collection;
+import java.util.List;
 
 public class InventorySystem {
     // Inner class to represent each product's information
@@ -7,10 +8,10 @@ public class InventorySystem {
         private String productID;
         private String name;
         private int stockLevel;
-        private String size;
-        private String color;
-        private String category;
-        private String location;
+        private String size; 
+        private String color; 
+        private String category; // New field for product category
+        private String location; // New field for product location
 
         public ProductTracker(String productID, String name, String category, int stockLevel, String size, String color) {
             this.productID = productID;
@@ -19,17 +20,18 @@ public class InventorySystem {
             this.size = size;
             this.color = color;
             this.category = category;
-            this.location = determineLocation(category);
+            this.location = determineLocation(category); // Set location based on category
         }
 
+        // Determine the location based on category
         private String determineLocation(String category) {
             switch (category.toLowerCase()) {
                 case "tops":
-                    return "A";
+                    return "A"; // Specific logic for categorizing tops
                 case "pants":
-                    return "B";
+                    return "B"; // Specific logic for categorizing pants
                 default:
-                    return "Unknown Location";
+                    return "Unknown Location"; // Fallback if category doesn't match
             }
         }
 
@@ -62,11 +64,6 @@ public class InventorySystem {
             return location;
         }
 
-        // Setter for stock level
-        public void setStockLevel(int stockLevel) {
-            this.stockLevel = stockLevel;
-        }
-
         @Override
         public String toString() {
             return "\nProduct ID: " + productID + 
@@ -80,36 +77,41 @@ public class InventorySystem {
     }
 
     // HashMap to store products using productID as the key
-    private HashMap<String, ProductTracker> products = new HashMap<>();
+    private HashMap<String, List<ProductTracker>> products = new HashMap<>();
 
     // Method to add a product to the inventory
     public void addProduct(String productID, String name, String category, int stockLevel, String size, String color) {
-        if (products.containsKey(productID)) {
-            System.out.println("Product with ID " + productID + " already exists.");
-            return;
-        }
-
         ProductTracker product = new ProductTracker(productID, name, category, stockLevel, size, color);
-        products.put(productID, product);
+        products.computeIfAbsent(productID, k -> new ArrayList<>()).add(product);
     }
 
     // Retrieve a product by its ID
-    public ProductTracker getProductByID(String productID) {
+    public List<ProductTracker> getProductByID(String productID) {
         return products.get(productID);
     }
 
     // Retrieve a product by its name
     public ProductTracker getProductByName(String name) {
-        for (ProductTracker product : products.values()) {
-            if (product.getName().equalsIgnoreCase(name)) {
-                return product;
+        for (List<ProductTracker> productList : products.values()) {
+            for (ProductTracker product : productList) {
+                if (product.getName().equalsIgnoreCase(name)) {
+                    return product;
+                }
             }
         }
-        return null;
+        return null; // Not found
     }
 
-    // Get all products
-    public Collection<ProductTracker> getProducts() {
-        return products.values();
+    // List all products in the inventory
+    public void listAllProducts() {
+        if (products.isEmpty()) {
+            System.out.println("No products in inventory.");
+            return;
+        }
+        for (List<ProductTracker> productList : products.values()) {
+            for (ProductTracker product : productList) {
+                System.out.println(product);
+            }
+        }
     }
 }
