@@ -1,0 +1,173 @@
+package Gawanibrian;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class Main {
+    private static InventorySystem inventorySystem = new InventorySystem();
+    private static StockReplenishment stockReplenishment;
+
+    public static void main(String[] args) {
+        // Initialize inventory with sample products
+        initializeInventory();
+
+        // Set threshold for replenishment
+        stockReplenishment = new StockReplenishment(10, inventorySystem);
+
+        JFrame frame = new JFrame("Inventory Management System");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 600);
+        frame.setLayout(new BorderLayout());
+
+        // Header and main panel setup
+        setupHeader(frame);
+        JPanel mainPanel = setupMainPanel(frame);
+
+        // Add buttons for Order and Replenishment in the footer
+        JPanel footerPanel = new JPanel();
+        JButton orderButton = new JButton("Process Order");
+        JButton replenishButton = new JButton("Replenish Stock");
+
+        orderButton.addActionListener(e -> processOrderDialog(frame));
+        replenishButton.addActionListener(e -> {
+            stockReplenishment.checkAndReplenishStock();
+            refreshProductDisplay(mainPanel); // Refresh to show updated stock levels
+        });
+
+        footerPanel.add(orderButton);
+        footerPanel.add(replenishButton);
+        frame.add(footerPanel, BorderLayout.SOUTH);
+
+        frame.setVisible(true);
+    }
+
+    private static void initializeInventory() {
+        inventorySystem.addProduct("PT01", "T-Shirt", "Tops", 50, "M", "Red");
+        inventorySystem.addProduct("PT02", "Polo", "Tops", 30, "L", "Red");
+        inventorySystem.addProduct("PT03", "Blouse", "Tops", 20, "S", "White");
+        inventorySystem.addProduct("PB01", "Shorts", "Pants", 25, "M", "Black");
+    }
+
+    private static void setupHeader(JFrame frame) {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        JTextField searchField = new JTextField();
+        headerPanel.add(new JLabel("Inventory Management"), BorderLayout.WEST);
+        headerPanel.add(searchField, BorderLayout.EAST);
+
+        // Search functionality
+        searchField.addActionListener(e -> {
+            String input = searchField.getText().trim();
+            JPanel mainPanel = (JPanel) frame.getContentPane().getComponent(1);
+            searchProducts(mainPanel, input);
+        });
+
+        frame.add(headerPanel, BorderLayout.NORTH);
+    }
+
+    private static JPanel setupMainPanel(JFrame frame) {
+        JPanel mainPanel = new JPanel(new GridLayout(0, 3, 10, 10));
+        frame.add(mainPanel, BorderLayout.CENTER);
+        refreshProductDisplay(mainPanel);
+        return mainPanel;
+    }
+
+    private static void refreshProductDisplay(JPanel mainPanel) {
+        mainPanel.removeAll();
+        for (InventorySystem.ProductTracker product : inventorySystem.getProducts()) {
+            JPanel productPanel = new JPanel(new BorderLayout());
+            JLabel nameLabel = new JLabel(product.getName() + " - Stock: " + product.getStockLevel());
+            JLabel idLabel = new JLabel("ID: " + product.getProductID(), SwingConstants.CENTER);
+            JButton detailsButton = new JButton("Details");
+
+            detailsButton.addActionListener(e -> {
+                String details = "Product ID: " + product.getProductID() +
+                                 "\nName: " + product.getName() +
+                                 "\nCategory: " + product.getCategory() +
+                                 "\nStock: " + product.getStockLevel() +
+                                 "\nSize: " + product.getSize() +
+                                 "\nColor: " + product.getColor();
+                JOptionPane.showMessageDialog(mainPanel, details, "Product Details", JOptionPane.INFORMATION_MESSAGE);
+            });
+
+            productPanel.add(nameLabel, BorderLayout.NORTH);
+            productPanel.add(idLabel, BorderLayout.CENTER);
+            productPanel.add(detailsButton, BorderLayout.SOUTH);
+            mainPanel.add(productPanel);
+        }
+        mainPanel.revalidate();
+        mainPanel.repaint();
+    }
+
+    private static void searchProducts(JPanel mainPanel, String input) {
+        mainPanel.removeAll();
+        InventorySystem.ProductTracker productInfoByID = inventorySystem.getProductByID(input);
+        InventorySystem.ProductTracker productInfoByName = inventorySystem.getProductByName(input);
+
+        if (productInfoByID != null) {
+            addProductToPanel(mainPanel, productInfoByID);
+        } else if (productInfoByName != null) {
+            addProductToPanel(mainPanel, productInfoByName);
+        } else {
+            JOptionPane.showMessageDialog(mainPanel, "Product not found.", "Not Found", JOptionPane.ERROR_MESSAGE);
+        }
+
+        mainPanel.revalidate();
+        mainPanel.repaint();
+    }
+
+    private static void addProductToPanel(JPanel mainPanel, InventorySystem.ProductTracker product) {
+        JPanel productPanel = new JPanel(new BorderLayout());
+        JLabel nameLabel = new JLabel(product.getName() + " - Stock: " + product.getStockLevel());
+        JLabel idLabel = new JLabel("ID: " + product.getProductID(), SwingConstants.CENTER);
+        JButton detailsButton = new JButton("Details");
+
+        detailsButton.addActionListener(e -> {
+            String details = "Product ID: " + product.getProductID() +
+                             "\nName: " + product.getName() +
+                             "\nCategory: " + product.getCategory() +
+                             "\nStock: " + product.getStockLevel() +
+                             "\nSize: " + product.getSize() +
+                             "\nColor: " + product.getColor();
+            JOptionPane.showMessageDialog(mainPanel, details, "Product Details", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        productPanel.add(nameLabel, BorderLayout.NORTH);
+        productPanel.add(idLabel, BorderLayout.CENTER);
+        productPanel.add(detailsButton, BorderLayout.SOUTH);
+        mainPanel.add(productPanel);
+    }
+
+    private static void processOrderDialog(JFrame parentFrame) {
+        JPanel orderPanel = new JPanel(new GridLayout(3, 2));
+        JTextField orderIDField = new JTextField();
+        JTextField productIDField = new JTextField();
+        JTextField quantityField = new JTextField();
+
+        orderPanel.add(new JLabel("Order ID:"));
+        orderPanel.add(orderIDField);
+        orderPanel.add(new JLabel("Product ID:"));
+        orderPanel.add(productIDField);
+        orderPanel.add(new JLabel("Quantity:"));
+        orderPanel.add(quantityField);
+
+        int result = JOptionPane.showConfirmDialog(parentFrame, orderPanel, "Process Order", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            String orderID = orderIDField.getText().trim();
+            String productID = productIDField.getText().trim();
+            int quantity;
+
+            try {
+                quantity = Integer.parseInt(quantityField.getText().trim());
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(parentFrame, "Enter a valid quantity.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            OrderFulfillment order = new OrderFulfillment(orderID, productID, quantity, inventorySystem);
+            order.processOrder();
+            refreshProductDisplay((JPanel) parentFrame.getContentPane().getComponent(1)); // Refresh main panel
+        }
+    }
+}
