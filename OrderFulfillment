@@ -1,10 +1,8 @@
-import java.util.List;
-
 public class OrderFulfillment {
     private String orderID;
     private String productID;
     private int quantity;
-    private String status; // Status of the order (e.g., Processing, Shipped, Delivered)
+    private String status;
     private InventorySystem inventorySystem;
 
     // Constructor
@@ -23,18 +21,20 @@ public class OrderFulfillment {
 
     // Process the order and update the inventory
     public void processOrder() {
-        List<InventorySystem.ProductTracker> productList = inventorySystem.getProductByID(productID);
-        if (productList != null && !productList.isEmpty()) {
-            InventorySystem.ProductTracker product = productList.get(0); // Assuming first product is selected
+        InventorySystem.ProductTracker product = inventorySystem.getProductByID(productID);
+        
+        if (product != null) {
             if (product.getStockLevel() >= quantity) {
-                product.setStockLevel(product.getStockLevel() - quantity);
+                product.setStockLevel(product.getStockLevel() - quantity); // Deduct stock
                 System.out.println("Order fulfilled. Product ID: " + productID + ", Quantity: " + quantity);
                 updateStatus("Shipped");
             } else {
-                System.out.println("Not enough stock to fulfill the order.");
+                System.out.println("Not enough stock to fulfill the order. Available stock: " + product.getStockLevel());
+                updateStatus("Pending - Insufficient Stock");
             }
         } else {
             System.out.println("Product not found for the given ID: " + productID);
+            updateStatus("Failed - Product Not Found");
         }
     }
 
