@@ -1,213 +1,275 @@
-package initialProject1;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class Main {
     private static InventorySystem inventorySystem = new InventorySystem();
+    private static StockReplenishment stockReplenishment;
+    private static UserAuthentication userAuth = new UserAuthentication();
 
     public static void main(String[] args) {
-        // Sample products to prepopulate inventory
+        // Initialize inventory with sample products
+        initializeInventory();
+
+        // Set threshold for replenishment
+        stockReplenishment = new StockReplenishment(10, inventorySystem);
+
+        // Show login screen
+        showLoginScreen();
+    }
+
+    private static void initializeInventory() {
         inventorySystem.addProduct("PT01", "T-Shirt", "Tops", 50, "M", "Red");
         inventorySystem.addProduct("PT02", "Polo", "Tops", 30, "L", "Red");
         inventorySystem.addProduct("PT03", "Blouse", "Tops", 20, "S", "White");
         inventorySystem.addProduct("PB01", "Shorts", "Pants", 25, "M", "Black");
+    }
 
+    private static void showLoginScreen() {
+        JFrame loginFrame = new JFrame("User Authentication");
+        loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginFrame.setSize(400, 300);
+
+        JPanel loginPanel = new JPanel(new GridLayout(4, 1, 10, 10));
+        JTextField usernameField = new JTextField();
+        JPasswordField passwordField = new JPasswordField();
+        JButton loginButton = new JButton("Login");
+        JButton registerButton = new JButton("Register Here");
+
+        // Make login button bigger
+        loginButton.setFont(new Font("Arial", Font.PLAIN, 18));
+        loginButton.setPreferredSize(new Dimension(100, 50));
+
+        // Make register button smaller and update text
+        registerButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        registerButton.setPreferredSize(new Dimension(100, 30));
+
+        // Add components to the panel
+        loginPanel.add(new JLabel("Username:"));
+        loginPanel.add(usernameField);
+        loginPanel.add(new JLabel("Password:"));
+        loginPanel.add(passwordField);
+        loginPanel.add(loginButton);
+        loginPanel.add(registerButton);
+
+        loginFrame.add(loginPanel);
+        loginFrame.setVisible(true);
+
+        // Action listener for login button
+        loginButton.addActionListener(e -> {
+            String username = usernameField.getText().trim();
+            String password = new String(passwordField.getPassword());
+            if (userAuth.loginUser(username, password)) {
+                JOptionPane.showMessageDialog(loginFrame, "Login successful! Welcome, " + username, "Login Success", JOptionPane.INFORMATION_MESSAGE);
+                loginFrame.dispose();
+                startInventoryManagement(); // Proceed to the inventory management system
+            } else {
+                JOptionPane.showMessageDialog(loginFrame, "Invalid username or password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // Action listener for register button
+        registerButton.addActionListener(e -> {
+            loginFrame.dispose();  // Close login screen
+            showRegistrationScreen();  // Open registration screen
+        });
+    }
+
+    private static void showRegistrationScreen() {
+        JFrame registrationFrame = new JFrame("User Registration");
+        registrationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        registrationFrame.setSize(400, 300);
+
+        JPanel registrationPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+        JTextField usernameField = new JTextField();
+        JPasswordField passwordField = new JPasswordField();
+        JTextField confirmPasswordField = new JPasswordField();
+        JButton registerButton = new JButton("Register");
+
+        // Add components to the panel
+        registrationPanel.add(new JLabel("Username:"));
+        registrationPanel.add(usernameField);
+        registrationPanel.add(new JLabel("Password:"));
+        registrationPanel.add(passwordField);
+        registrationPanel.add(new JLabel("Confirm Password:"));
+        registrationPanel.add(confirmPasswordField);
+
+        registrationPanel.add(registerButton);
+        registrationFrame.add(registrationPanel);
+        registrationFrame.setVisible(true);
+
+        // Action listener for register button
+        registerButton.addActionListener(e -> {
+            String username = usernameField.getText().trim();
+            String password = new String(passwordField.getPassword());
+            String confirmPassword = new String(((JPasswordField) confirmPasswordField).getPassword());
+
+            if (password.equals(confirmPassword)) {
+                if (userAuth.registerUser(username, password)) {
+                    JOptionPane.showMessageDialog(registrationFrame, "Registration successful! You can now log in.", "Registration Success", JOptionPane.INFORMATION_MESSAGE);
+                    registrationFrame.dispose();
+                    showLoginScreen(); // Return to login screen
+                } else {
+                    JOptionPane.showMessageDialog(registrationFrame, "Registration failed. Username already exists.", "Registration Failed", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(registrationFrame, "Passwords do not match. Please try again.", "Password Mismatch", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+    }
+
+    private static void startInventoryManagement() {
         JFrame frame = new JFrame("Inventory Management System");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setLayout(new BorderLayout());
 
-        // Sticky Header
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        JLabel logoLabel = new JLabel("Your Logo Here", SwingConstants.LEFT);
-        JTextField searchField = new JTextField();
-        headerPanel.add(logoLabel, BorderLayout.WEST);
-        headerPanel.add(searchField, BorderLayout.EAST);
-        frame.add(headerPanel, BorderLayout.NORTH);
+        // Header and main panel setup
+        setupHeader(frame);
+        JPanel mainPanel = setupMainPanel(frame);
 
-        // Main content area
-        JPanel mainPanel = new JPanel(new GridLayout(0, 3, 10, 10));
-        frame.add(mainPanel, BorderLayout.CENTER);
+        // Add buttons for Order and Replenishment in the footer
+        JPanel footerPanel = new JPanel();
+        JButton orderButton = new JButton("Process Order");
+        JButton replenishButton = new JButton("Replenish Stock");
+        JButton logoutButton = new JButton("Logout");
 
-        // Add button to the footer
-        JButton addButton = new JButton("Add Inventory");
-        addButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showAddProductDialog(frame);
-            }
+        orderButton.addActionListener(e -> processOrderDialog(frame));
+        replenishButton.addActionListener(e -> {
+            stockReplenishment.checkAndReplenishStock();
+            refreshProductDisplay(mainPanel); // Refresh to show updated stock levels
         });
-        frame.add(addButton, BorderLayout.SOUTH);
-
-        // Populate main panel with product information
-        refreshProductDisplay(mainPanel);
-
-        // Search functionality
-        searchField.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String input = searchField.getText().trim();
-                searchProducts(mainPanel, input);
-            }
+        logoutButton.addActionListener(e -> {
+            userAuth.logoutUser();
+            frame.dispose();
+            showLoginScreen(); // Return to login screen
         });
+
+        footerPanel.add(orderButton);
+        footerPanel.add(replenishButton);
+        footerPanel.add(logoutButton);
+        frame.add(footerPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
     }
 
+    private static void setupHeader(JFrame frame) {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        JTextField searchField = new JTextField();
+        headerPanel.add(new JLabel("Inventory Management"), BorderLayout.WEST);
+        headerPanel.add(searchField, BorderLayout.EAST);
+
+        // Search functionality
+        searchField.addActionListener(e -> {
+            String input = searchField.getText().trim();
+            JPanel mainPanel = (JPanel) frame.getContentPane().getComponent(1);
+            searchProducts(mainPanel, input);
+        });
+
+        frame.add(headerPanel, BorderLayout.NORTH);
+    }
+
+    private static JPanel setupMainPanel(JFrame frame) {
+        JPanel mainPanel = new JPanel(new GridLayout(0, 3, 10, 10));
+        frame.add(mainPanel, BorderLayout.CENTER);
+        refreshProductDisplay(mainPanel);
+        return mainPanel;
+    }
+
     private static void refreshProductDisplay(JPanel mainPanel) {
         mainPanel.removeAll();
-        // Iterate over the products directly
         for (InventorySystem.ProductTracker product : inventorySystem.getProducts()) {
-            addProductToPanel(mainPanel, product);
+            JPanel productPanel = new JPanel(new BorderLayout());
+            JLabel nameLabel = new JLabel(product.getName() + " - Stock: " + product.getStockLevel());
+            JLabel idLabel = new JLabel("ID: " + product.getProductID(), SwingConstants.CENTER);
+            JButton detailsButton = new JButton("Details");
+
+            detailsButton.addActionListener(e -> {
+                String details = "Product ID: " + product.getProductID() +
+                                 "\nName: " + product.getName() +
+                                 "\nCategory: " + product.getCategory() +
+                                 "\nStock: " + product.getStockLevel() +
+                                 "\nSize: " + product.getSize() +
+                                 "\nColor: " + product.getColor();
+                JOptionPane.showMessageDialog(mainPanel, details, "Product Details", JOptionPane.INFORMATION_MESSAGE);
+            });
+
+            productPanel.add(nameLabel, BorderLayout.NORTH);
+            productPanel.add(idLabel, BorderLayout.CENTER);
+            productPanel.add(detailsButton, BorderLayout.SOUTH);
+            mainPanel.add(productPanel);
         }
+        mainPanel.revalidate();
+        mainPanel.repaint();
+    }
+
+    private static void searchProducts(JPanel mainPanel, String input) {
+        mainPanel.removeAll();
+        InventorySystem.ProductTracker productInfoByID = inventorySystem.getProductByID(input);
+        InventorySystem.ProductTracker productInfoByName = inventorySystem.getProductByName(input);
+
+        if (productInfoByID != null) {
+            addProductToPanel(mainPanel, productInfoByID);
+        } else if (productInfoByName != null) {
+            addProductToPanel(mainPanel, productInfoByName);
+        } else {
+            JOptionPane.showMessageDialog(mainPanel, "Product not found.", "Not Found", JOptionPane.ERROR_MESSAGE);
+        }
+
         mainPanel.revalidate();
         mainPanel.repaint();
     }
 
     private static void addProductToPanel(JPanel mainPanel, InventorySystem.ProductTracker product) {
         JPanel productPanel = new JPanel(new BorderLayout());
-        Image img = new ImageIcon(Main.class.getResource("/PT01.jpg")).getImage(); 
-        Image scaledImg = img.getScaledInstance(100, 100, Image.SCALE_SMOOTH); 
-        ImageIcon productImageIcon = new ImageIcon(scaledImg);
-        
-        JLabel productImage = new JLabel(productImageIcon, SwingConstants.CENTER);
-        JLabel productNameLabel = new JLabel(product.getName(), SwingConstants.CENTER);
-        JLabel productIDLabel = new JLabel("ID: " + product.getProductID(), SwingConstants.CENTER);
-        JLabel stockLabel = new JLabel("Stock: " + product.getStockLevel(), SwingConstants.CENTER);
-    
-        JButton detailsButton = new JButton("Show Details");
-        JPanel detailsPanel = new JPanel(); // Panel to hold details
-        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS)); // Layout for details
-    
-        detailsButton.addActionListener(new ActionListener() {
-            boolean detailsVisible = false;
-    
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (detailsVisible) {
-                    productPanel.remove(detailsPanel); // Remove details
-                    detailsButton.setText("Show Details"); // Change button text back
-                    detailsVisible = false;
-                } else {
-                    String details = "Size: " + product.getSize() + 
-                                     "\nColor: " + product.getColor() + 
-                                     "\nLocation: " + product.getLocation();
-                    JLabel detailsLabel = new JLabel(details, SwingConstants.CENTER);
-                    detailsPanel.removeAll(); // Clear previous details
-                    detailsPanel.add(detailsLabel);
-                    productPanel.add(detailsPanel, BorderLayout.SOUTH); // Add details panel
-                    detailsButton.setText("Hide Details"); // Change button text
-                    detailsVisible = true;
-                }
-                productPanel.revalidate();
-                productPanel.repaint();
-            }
+        JLabel nameLabel = new JLabel(product.getName() + " - Stock: " + product.getStockLevel());
+        JLabel idLabel = new JLabel("ID: " + product.getProductID(), SwingConstants.CENTER);
+        JButton detailsButton = new JButton("Details");
+
+        detailsButton.addActionListener(e -> {
+            String details = "Product ID: " + product.getProductID() +
+                             "\nName: " + product.getName() +
+                             "\nCategory: " + product.getCategory() +
+                             "\nStock: " + product.getStockLevel() +
+                             "\nSize: " + product.getSize() +
+                             "\nColor: " + product.getColor();
+            JOptionPane.showMessageDialog(mainPanel, details, "Product Details", JOptionPane.INFORMATION_MESSAGE);
         });
-    
-        productPanel.add(productImage, BorderLayout.NORTH);
-        productPanel.add(productNameLabel, BorderLayout.CENTER);
-        productPanel.add(productIDLabel, BorderLayout.SOUTH);
-        productPanel.add(stockLabel, BorderLayout.SOUTH);
+
+        productPanel.add(nameLabel, BorderLayout.NORTH);
+        productPanel.add(idLabel, BorderLayout.CENTER);
         productPanel.add(detailsButton, BorderLayout.SOUTH);
         mainPanel.add(productPanel);
     }
-    
 
-    private static void searchProducts(JPanel mainPanel, String input) {
-        mainPanel.removeAll(); // Clear the current display
-
-        // Check if input is a valid ID first
-        InventorySystem.ProductTracker productInfoByID = inventorySystem.getProductByID(input);
-        
-        if (productInfoByID != null) {
-            // Display the product info if found by ID
-            addProductToPanel(mainPanel, productInfoByID);
-        } else {
-            // If not found by ID, check by name
-            InventorySystem.ProductTracker productInfoByName = inventorySystem.getProductByName(input);
-            
-            if (productInfoByName != null) {
-                addProductToPanel(mainPanel, productInfoByName);
-            } else {
-                JOptionPane.showMessageDialog(mainPanel, "Product does not exist.", "Not Found", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-
-        mainPanel.revalidate();
-        mainPanel.repaint();
-    }
-
-    // Show dialog for adding a new product
-    private static void showAddProductDialog(JFrame parentFrame) {
-        JPanel addProductPanel = new JPanel(new GridLayout(6, 2));
+    private static void processOrderDialog(JFrame parentFrame) {
+        JPanel orderPanel = new JPanel(new GridLayout(3, 2));
+        JTextField orderIDField = new JTextField();
         JTextField productIDField = new JTextField();
-        JTextField nameField = new JTextField();
-        JTextField stockField = new JTextField();
-        JTextField categoryField = new JTextField();
-        JTextField sizeField = new JTextField();
-        JTextField colorField = new JTextField();
+        JTextField quantityField = new JTextField();
 
-        addProductPanel.add(new JLabel("Product ID:"));
-        addProductPanel.add(productIDField);
-        addProductPanel.add(new JLabel("Name:"));
-        addProductPanel.add(nameField);
-        addProductPanel.add(new JLabel("Stock Level:"));
-        addProductPanel.add(stockField);
-        addProductPanel.add(new JLabel("Category (Tops/Pants):"));
-        addProductPanel.add(categoryField);
-        addProductPanel.add(new JLabel("Size (XS, S, M, L, XL, XXL):"));
-        addProductPanel.add(sizeField);
-        addProductPanel.add(new JLabel("Color:"));
-        addProductPanel.add(colorField);
+        orderPanel.add(new JLabel("Order ID:"));
+        orderPanel.add(orderIDField);
+        orderPanel.add(new JLabel("Product ID:"));
+        orderPanel.add(productIDField);
+        orderPanel.add(new JLabel("Quantity:"));
+        orderPanel.add(quantityField);
 
-        int result = JOptionPane.showConfirmDialog(parentFrame, addProductPanel, "Add Product", JOptionPane.OK_CANCEL_OPTION);
+        int result = JOptionPane.showConfirmDialog(parentFrame, orderPanel, "Process Order", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
+            String orderID = orderIDField.getText().trim();
             String productID = productIDField.getText().trim();
-            String name = nameField.getText().trim();
-            int stockLevel;
+            int quantity;
 
-            // Try to parse stock level and catch any exceptions
             try {
-                stockLevel = Integer.parseInt(stockField.getText().trim());
+                quantity = Integer.parseInt(quantityField.getText().trim());
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(parentFrame, "Please enter a valid number for Stock Level.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(parentFrame, "Enter a valid quantity.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            String category = categoryField.getText().trim();
-            String size = sizeField.getText().trim().toUpperCase(); // Convert to uppercase for consistency
-            String color = colorField.getText().trim();
-
-            // Validate Product ID
-            if (!isValidProductID(productID)) {
-                JOptionPane.showMessageDialog(parentFrame, "Invalid Product ID. Please enter a valid ID (PT01, PT02, PT03, PB01, PB02, PB03).", "Invalid Product ID", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            // Validate Size
-            if (!isValidSize(size)) {
-                JOptionPane.showMessageDialog(parentFrame, "Invalid Size. Please enter a valid size (XS, S, M, L, XL, XXL).", "Invalid Size", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            inventorySystem.addProduct(productID, name, category, stockLevel, size, color);
-            JOptionPane.showMessageDialog(parentFrame, "Product added successfully!");
-            refreshProductDisplay((JPanel) parentFrame.getContentPane().getComponent(1)); // Refresh the product display
+            OrderFulfillment order = new OrderFulfillment(orderID, productID, quantity, inventorySystem);
+            order.processOrder();
+            refreshProductDisplay((JPanel) parentFrame.getContentPane().getComponent(1)); // Refresh main panel
         }
-    }
-
-    // Method to validate the size input
-    private static boolean isValidSize(String size) {
-        return size.equals("XS") || size.equals("S") || size.equals("M") ||
-               size.equals("L") || size.equals("XL") || size.equals("XXL");
-    }
-
-    // Method to validate the product ID
-    private static boolean isValidProductID(String productID) {
-        return productID.equals("PT01") || productID.equals("PT02") || productID.equals("PT03") ||
-               productID.equals("PB01") || productID.equals("PB02") || productID.equals("PB03");
     }
 }
