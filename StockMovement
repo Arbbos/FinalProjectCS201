@@ -1,0 +1,60 @@
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class StockMovement {
+    public static class MovementRecord {
+        private String productID;
+        private String action; // "Added", "Removed", "Replenished", etc.
+        private int quantity;
+        private String timestamp;
+
+        public MovementRecord(String productID, String action, int quantity, String timestamp) {
+            this.productID = productID;
+            this.action = action;
+            this.quantity = quantity;
+            this.timestamp = timestamp;
+        }
+
+        @Override
+        public String toString() {
+            return "Product ID: " + productID +
+                   ", Action: " + action +
+                   ", Quantity: " + quantity +
+                   ", Timestamp: " + timestamp;
+        }
+    }
+
+    private Queue<MovementRecord> stockMovements;
+
+    public StockMovement() {
+        stockMovements = new LinkedList<>();
+    }
+
+    // Add a new stock movement record
+    public void addMovement(String productID, String action, int quantity) {
+        String timestamp = java.time.LocalDateTime.now().toString(); // Current timestamp
+        MovementRecord record = new MovementRecord(productID, action, quantity, timestamp);
+        stockMovements.add(record);
+
+        // Optional: Limit the size of the queue if needed
+        if (stockMovements.size() > 100) {
+            stockMovements.poll(); // Remove oldest record to maintain a manageable size
+        }
+    }
+
+    // Retrieve all stock movement records
+    public Queue<MovementRecord> getMovements() {
+        return new LinkedList<>(stockMovements); // Return a copy of the queue
+    }
+
+    // Display all stock movement records
+    public void displayMovements() {
+        if (stockMovements.isEmpty()) {
+            System.out.println("No stock movements recorded.");
+        } else {
+            for (MovementRecord record : stockMovements) {
+                System.out.println(record);
+            }
+        }
+    }
+}
