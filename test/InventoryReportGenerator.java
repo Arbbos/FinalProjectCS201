@@ -10,60 +10,66 @@ import java.util.ArrayList;
 
 public class InventoryReportGenerator {
 
-    public static void generateInventoryReport(InventorySystem inventorySystem) {
-        Collection<InventorySystem.ProductTracker> products = inventorySystem.getProducts();
-        List<InventorySystem.ProductTracker> productList = new ArrayList<>(products);
+	public static void generateInventoryReport(InventorySystem inventorySystem) {
+	    Collection<InventorySystem.ProductTracker> products = inventorySystem.getProducts();
+	    List<InventorySystem.ProductTracker> productList = new ArrayList<>(products);
 
-        JPanel filterPanel = createFilterPanel();
+	    JPanel filterPanel = createFilterPanel();
+	    filterPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding to the filter panel
 
-        List<InventorySystem.ProductTracker> filteredProducts = new ArrayList<>(productList);
+	    List<InventorySystem.ProductTracker> filteredProducts = new ArrayList<>(productList);
 
-        String[] columnNames = {"Product ID", "Name", "Category", "Stock Level", "Size", "Color", "Location"};
+	    String[] columnNames = {"Product ID", "Name", "Category", "Stock Level", "Size", "Color", "Location"};
 
-        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
+	    DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
 
-        JButton filterButton = new JButton("Apply Filters");
-        filterButton.addActionListener(e -> {
-            filteredProducts.clear();
-            filteredProducts.addAll(applyFilters(productList, filterPanel));
-            updateTableModel(filteredProducts, tableModel);
-        });
+	    JButton filterButton = new JButton("Apply Filters");
+	    filterButton.addActionListener(e -> {
+	        filteredProducts.clear();
+	        filteredProducts.addAll(applyFilters(productList, filterPanel));
+	        updateTableModel(filteredProducts, tableModel);
+	    });
 
-        JButton resetButton = new JButton("Reset Filters");
-        resetButton.addActionListener(e -> {
-            resetFilters(filterPanel);
-            filteredProducts.clear();
-            filteredProducts.addAll(productList);
-            updateTableModel(filteredProducts, tableModel);
-        });
+	    JButton resetButton = new JButton("Reset Filters");
+	    resetButton.addActionListener(e -> {
+	        resetFilters(filterPanel);
+	        filteredProducts.clear();
+	        filteredProducts.addAll(productList);
+	        updateTableModel(filteredProducts, tableModel);
+	    });
 
-        updateTableModel(filteredProducts, tableModel);
+	    updateTableModel(filteredProducts, tableModel);
 
-        JTable table = new JTable(tableModel);
-        table.setFillsViewportHeight(true);
+	    JTable table = new JTable(tableModel);
+	    table.setFillsViewportHeight(true);
 
-        JScrollPane scrollPane = new JScrollPane(table);
+	    JScrollPane scrollPane = new JScrollPane(table);
+	    scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding around the table
 
-        JFrame frame = new JFrame("Inventory Report");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+	    JFrame frame = new JFrame("Inventory Report");
+	    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        frame.getContentPane().add(filterPanel, BorderLayout.NORTH);
-        frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
+	    frame.getContentPane().setLayout(new BorderLayout(10, 10)); // Set gap between components
 
-        JButton saveButton = new JButton("Save Report");
-        saveButton.addActionListener(e -> saveReport(table));
+	    frame.getContentPane().add(filterPanel, BorderLayout.NORTH);
+	    frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
 
-        JPanel panel = new JPanel();
-        panel.add(saveButton);
-        frame.getContentPane().add(panel, BorderLayout.SOUTH);
+	    JButton saveButton = new JButton("Save Report");
+	    saveButton.addActionListener(e -> saveReport(table));
 
-        panel.add(filterButton);
-        panel.add(resetButton);  // Add the reset button to the panel
+	    JPanel panel = new JPanel();
+	    panel.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 10)); // Add padding to panel and set right-aligned
+	    panel.add(saveButton);
+	    panel.add(filterButton);
+	    panel.add(resetButton);  // Add the reset button to the panel
 
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-    }
+	    frame.getContentPane().add(panel, BorderLayout.SOUTH);
+
+	    frame.setSize(800, 600);  // Set preferred window size
+	    frame.setLocationRelativeTo(null);
+	    frame.setVisible(true);
+	}
+
 
     private static JPanel createFilterPanel() {
         JPanel filterPanel = new JPanel(new GridLayout(5, 2));
