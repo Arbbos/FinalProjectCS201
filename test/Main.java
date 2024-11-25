@@ -25,11 +25,9 @@ public class Main {
 
         // Set threshold for replenishment
         stockReplenishment = new StockReplenishment(10, inventorySystem);
-
         // show splash screen
         SplashScreen.showSplashScreen();
-        // Show login screen
-       
+        // Show login screen       
     }
 
     private static void initializeInventory() {
@@ -276,63 +274,118 @@ public class Main {
         frame.setLayout(new BorderLayout());
         frame.setLocationRelativeTo(null);
 
-        // Header and main panel setup
-        setupHeader(frame);
+        // Create a top container for the header and navigation bar
+        JPanel topPanel = new JPanel(new BorderLayout());
+
+        // Setup the header
+        setupHeader(topPanel);
+
+        // Create the navigation bar (footer buttons as a navbar)
+        JPanel navBar = createNavBar(frame);
+
+        // Add the header and navigation bar to the top panel
+        topPanel.add(navBar, BorderLayout.SOUTH);
+
+        // Add the top panel to the frame
+        frame.add(topPanel, BorderLayout.NORTH);
+
+        // Setup the main panel for content
         JPanel mainPanel = setupMainPanel(frame);
+        frame.add(mainPanel, BorderLayout.CENTER);
 
-        // Add buttons for Order, Replenishment, Add Product, and Logout in the footer
-        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10)); // Use FlowLayout for horizontal layout
-        footerPanel.setBackground(new Color(0x233c4b)); // Set footer background color
-        footerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20)); // Add padding to the footer
+        frame.setVisible(true);
+    }
 
-        // Buttons setup
-        JButton orderButton = new JButton("Process Order");
-        JButton replenishButton = new JButton("Replenish Stock");
-        JButton addProductButton = new JButton("Add New Product");
-        JButton viewStockMovementsButton = new JButton("View Stock Movements");
-        JButton reportButton = new JButton("Generate Inventory Report");
-        JButton logoutButton = new JButton("Logout");
+    private static void setupHeader(JPanel topPanel) {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20)); // Add padding
+        headerPanel.setBackground(new Color(0x233c4b)); // Background color
+        headerPanel.setForeground(Color.WHITE); // Text color
 
-        // Add listeners
+        JLabel titleLabel = new JLabel("Inventory Management");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); // Font size
+        titleLabel.setForeground(Color.WHITE);
+
+        JTextField searchField = new JTextField();
+        searchField.setPreferredSize(new Dimension(200, 30));
+        searchField.setText("Search");
+        searchField.setForeground(Color.GRAY);
+
+        searchField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (searchField.getText().equals("Search")) {
+                    searchField.setText("");
+                    searchField.setForeground(Color.BLACK);
+                }
+            }
+
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (searchField.getText().isEmpty()) {
+                    searchField.setText("Search");
+                    searchField.setForeground(Color.GRAY);
+                }
+            }
+        });
+
+        searchField.addActionListener(e -> {
+            String input = searchField.getText().trim();
+            JPanel mainPanel = (JPanel) topPanel.getParent().getComponent(1); // Get the main panel
+            searchProducts(mainPanel, input);
+        });
+
+        headerPanel.add(titleLabel, BorderLayout.WEST);
+        headerPanel.add(searchField, BorderLayout.EAST);
+
+        topPanel.add(headerPanel, BorderLayout.NORTH);
+    }
+
+    private static JPanel createNavBar(JFrame frame) {
+        JPanel navBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10)); // Horizontal layout
+        navBar.setBackground(new Color(0x233c4b)); // Background color
+        navBar.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20)); // Padding
+
+        // Create navigation buttons
+        JButton orderButton = createNavButton("Process Order");
+        JButton replenishButton = createNavButton("Replenish Stock");
+        JButton addProductButton = createNavButton("Add New Product");
+        JButton viewStockMovementsButton = createNavButton("View Stock Movements");
+        JButton reportButton = createNavButton("Generate Inventory Report");
+        JButton logoutButton = createNavButton("Logout");
+
+        // Add action listeners
         orderButton.addActionListener(e -> processOrderDialog(frame));
         replenishButton.addActionListener(e -> {
             stockReplenishment.checkAndReplenishStock();
-            refreshProductDisplay(mainPanel); // Refresh to show updated stock levels
-        });
-        reportButton.addActionListener(e -> {
-            // Generate the inventory report
-            InventoryReportGenerator.generateInventoryReport(inventorySystem);
+            refreshProductDisplay(frame.getContentPane()); // Refresh stock
         });
         addProductButton.addActionListener(e -> openAddProductDialog(frame));
+        viewStockMovementsButton.addActionListener(e -> stockmovement.viewStockMovementsFromDatabase());
+        reportButton.addActionListener(e -> InventoryReportGenerator.generateInventoryReport(inventorySystem));
         logoutButton.addActionListener(e -> {
             userAuth.logoutUser();
             frame.dispose();
-            showLoginScreen(); // Return to login screen
+            showLoginScreen();
         });
 
-        viewStockMovementsButton.addActionListener(e -> {
-            stockmovement.viewStockMovementsFromDatabase();
-        });
+        // Add buttons to the navbar
+        navBar.add(orderButton);
+        navBar.add(replenishButton);
+        navBar.add(addProductButton);
+        navBar.add(viewStockMovementsButton);
+        navBar.add(reportButton);
+        navBar.add(logoutButton);
 
-        // Add buttons to footer panel
-        footerPanel.add(orderButton);
-        footerPanel.add(replenishButton);
-        footerPanel.add(reportButton);
-        footerPanel.add(addProductButton);
-        footerPanel.add(viewStockMovementsButton);
-        footerPanel.add(logoutButton);
+        return navBar;
+    }
 
-        // Adjust button sizes for uniformity (optional)
-        for (Component button : footerPanel.getComponents()) {
-            if (button instanceof JButton) {
-                ((JButton) button).setPreferredSize(new Dimension(180, 40)); // Set a consistent button size
-            }
-        }
-
-        // Add footer panel to the frame
-        frame.add(footerPanel, BorderLayout.SOUTH);
-
-        frame.setVisible(true);
+    private static JButton createNavButton(String text) {
+        JButton button = new JButton(text);
+        button.setPreferredSize(new Dimension(180, 40)); // Consistent button size
+        button.setBackground(new Color(0x456a7f)); // Background color
+        button.setForeground(Color.WHITE); // Text color
+        button.setFont(new Font("Arial", Font.BOLD, 14)); // Font style
+        button.setFocusPainted(false); // No focus border
+        return button;
     }
 
     // Method to open the dialog for adding a new product
@@ -414,52 +467,52 @@ public class Main {
     }
     
 
-    private static void setupHeader(JFrame frame) {
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20)); // Add padding (top, left, bottom, right)
-        headerPanel.setBackground(new Color(0x233c4b)); // Set button color
-        headerPanel.setForeground(Color.WHITE); // Set text color
-    
-        // Create and set a larger font for the title
-        JLabel titleLabel = new JLabel("Inventory Management");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));  // Set the font to Arial, Bold, size 24
-        titleLabel.setForeground(Color.WHITE);
-    
-        JTextField searchField = new JTextField();
-        searchField.setPreferredSize(new Dimension(200, 30)); // Set preferred width for the search field
-        searchField.setText("Search");  // Set initial placeholder text
-    
-        // Add focus listener to simulate placeholder behavior
-        searchField.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                if (searchField.getText().equals("Search by ID")) {
-                    searchField.setText("");
-                    searchField.setForeground(Color.BLACK); // Set text color to black when typing
-                }
-            }
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                if (searchField.getText().isEmpty()) {
-                    searchField.setText("Search");
-                    searchField.setForeground(Color.GRAY); // Set text color to gray when placeholder is visible
-                }
-            }
-        });
-    
-        // Set the initial color of the text field to gray to indicate placeholder
-        searchField.setForeground(Color.GRAY);
-    
-        headerPanel.add(titleLabel, BorderLayout.WEST);
-        headerPanel.add(searchField, BorderLayout.EAST);
-    
-        // Search functionality
-        searchField.addActionListener(e -> {
-            String input = searchField.getText().trim();
-            JPanel mainPanel = (JPanel) frame.getContentPane().getComponent(1);
-            searchProducts(mainPanel, input);
-        });
-    
-        frame.add(headerPanel, BorderLayout.NORTH);
-    }
+//    private static void setupHeader(JFrame frame) {
+//        JPanel headerPanel = new JPanel(new BorderLayout());
+//        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20)); // Add padding (top, left, bottom, right)
+//        headerPanel.setBackground(new Color(0x233c4b)); // Set button color
+//        headerPanel.setForeground(Color.WHITE); // Set text color
+//    
+//        // Create and set a larger font for the title
+//        JLabel titleLabel = new JLabel("Inventory Management");
+//        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));  // Set the font to Arial, Bold, size 24
+//        titleLabel.setForeground(Color.WHITE);
+//    
+//        JTextField searchField = new JTextField();
+//        searchField.setPreferredSize(new Dimension(200, 30)); // Set preferred width for the search field
+//        searchField.setText("Search");  // Set initial placeholder text
+//    
+//        // Add focus listener to simulate placeholder behavior
+//        searchField.addFocusListener(new java.awt.event.FocusAdapter() {
+//            public void focusGained(java.awt.event.FocusEvent evt) {
+//                if (searchField.getText().equals("Search by ID")) {
+//                    searchField.setText("");
+//                    searchField.setForeground(Color.BLACK); // Set text color to black when typing
+//                }
+//            }
+//            public void focusLost(java.awt.event.FocusEvent evt) {
+//                if (searchField.getText().isEmpty()) {
+//                    searchField.setText("Search");
+//                    searchField.setForeground(Color.GRAY); // Set text color to gray when placeholder is visible
+//                }
+//            }
+//        });
+//    
+//        // Set the initial color of the text field to gray to indicate placeholder
+//        searchField.setForeground(Color.GRAY);
+//    
+//        headerPanel.add(titleLabel, BorderLayout.WEST);
+//        headerPanel.add(searchField, BorderLayout.EAST);
+//    
+//        // Search functionality
+//        searchField.addActionListener(e -> {
+//            String input = searchField.getText().trim();
+//            JPanel mainPanel = (JPanel) frame.getContentPane().getComponent(1);
+//            searchProducts(mainPanel, input);
+//        });
+//    
+//        frame.add(headerPanel, BorderLayout.NORTH);
+//    }
     
 
     private static JPanel setupMainPanel(JFrame frame) {
@@ -469,8 +522,8 @@ public class Main {
         return mainPanel;
     }
 
-    private static void refreshProductDisplay(JPanel mainPanel) {
-        mainPanel.removeAll();
+    private static void refreshProductDisplay(Container container) {
+        container.removeAll();
         for (InventorySystem.ProductTracker product : inventorySystem.getProducts()) {
             JPanel productPanel = new JPanel(new BorderLayout());
             JLabel nameLabel = new JLabel(product.getName() + " - Stock: " + product.getStockLevel());
@@ -484,16 +537,16 @@ public class Main {
                                  "\nStock: " + product.getStockLevel() +
                                  "\nSize: " + product.getSize() +
                                  "\nColor: " + product.getColor();
-                JOptionPane.showMessageDialog(mainPanel, details, "Product Details", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(container, details, "Product Details", JOptionPane.INFORMATION_MESSAGE);
             });
 
             productPanel.add(nameLabel, BorderLayout.NORTH);
             productPanel.add(idLabel, BorderLayout.CENTER);
             productPanel.add(detailsButton, BorderLayout.SOUTH);
-            mainPanel.add(productPanel);
+            container.add(productPanel);
         }
-        mainPanel.revalidate();
-        mainPanel.repaint();
+        container.revalidate();
+        container.repaint();
     }
 
     private static void searchProducts(JPanel mainPanel, String input) {
