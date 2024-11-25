@@ -356,7 +356,7 @@ public class Main {
         orderButton.addActionListener(e -> processOrderDialog(frame));
         replenishButton.addActionListener(e -> {
             stockReplenishment.checkAndReplenishStock();
-            refreshProductDisplay(frame.getContentPane()); // Refresh stock
+            refreshProductDisplay(setupMainPanel(frame)); // Refresh stock
         });
         addProductButton.addActionListener(e -> openAddProductDialog(frame));
         viewStockMovementsButton.addActionListener(e -> stockmovement.viewStockMovementsFromDatabase());
@@ -522,8 +522,8 @@ public class Main {
         return mainPanel;
     }
 
-    private static void refreshProductDisplay(Container container) {
-        container.removeAll();
+    private static void refreshProductDisplay(JPanel mainPanel) {
+    	mainPanel.removeAll();
         for (InventorySystem.ProductTracker product : inventorySystem.getProducts()) {
             JPanel productPanel = new JPanel(new BorderLayout());
             JLabel nameLabel = new JLabel(product.getName() + " - Stock: " + product.getStockLevel());
@@ -537,16 +537,16 @@ public class Main {
                                  "\nStock: " + product.getStockLevel() +
                                  "\nSize: " + product.getSize() +
                                  "\nColor: " + product.getColor();
-                JOptionPane.showMessageDialog(container, details, "Product Details", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(mainPanel, details, "Product Details", JOptionPane.INFORMATION_MESSAGE);
             });
 
             productPanel.add(nameLabel, BorderLayout.NORTH);
             productPanel.add(idLabel, BorderLayout.CENTER);
             productPanel.add(detailsButton, BorderLayout.SOUTH);
-            container.add(productPanel);
+            mainPanel.add(productPanel);
         }
-        container.revalidate();
-        container.repaint();
+        mainPanel.revalidate();
+        mainPanel.repaint();
     }
 
     private static void searchProducts(JPanel mainPanel, String input) {
