@@ -129,6 +129,11 @@ public class InventorySystem {
     public Collection<ProductTracker> getProducts() {
         return products.values();
     }
+
+    private static String getProductImagePath(String productID) {
+    InventorySystem.ProductTracker product = inventorySystem.getProductByID(productID);
+    return product != null ? product.getImagePath() : "lib/images/default_image.png"; // Default image if not found
+}
        
 }
 
