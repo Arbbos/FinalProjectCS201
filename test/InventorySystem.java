@@ -22,6 +22,7 @@ public class InventorySystem {
         private String color;
         private String category;
         private String location;
+        private String imagePath;
 
         public ProductTracker(String productID, String name, String category, int stockLevel, String size, String color) {
             this.productID = productID;
@@ -31,8 +32,13 @@ public class InventorySystem {
             this.color = color;
             this.category = category;
             this.location = determineLocation(category);
+            this.imagePath = imagePath;
         }
 
+        public String getImagePath() {
+            return imagePath;
+        }
+        
         private String determineLocation(String category) {
             switch (category.toLowerCase()) {
                 case "tops":
@@ -94,13 +100,13 @@ public class InventorySystem {
     private HashMap<String, ProductTracker> products = new HashMap<>();
 
     // Method to add a product to the inventory
-    public void addProduct(String productID, String name, String category, int stockLevel, String size, String color) {
+    public void addProduct(String productID, String name, String category, int stockLevel, String size, String color, String imagePath) {
         if (products.containsKey(productID)) {
             System.out.println("Product with ID " + productID + " already exists.");
             return;
         }
 
-        ProductTracker product = new ProductTracker(productID, name, category, stockLevel, size, color);
+        ProductTracker product = new ProductTracker(productID, name, category, stockLevel, size, color, imagePath);
         products.put(productID, product);
     }
 
