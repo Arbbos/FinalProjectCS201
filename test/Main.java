@@ -31,11 +31,11 @@ public class Main {
     }
 
     private static void initializeInventory() {
-        inventorySystem.addProduct("PT01", "T-Shirt", "Tops", 50, "M", "Red");
-        inventorySystem.addProduct("PT02", "Polo", "Tops", 30, "L", "Red");
-        inventorySystem.addProduct("PT03", "Blouse", "Tops", 20, "S", "White");
-        inventorySystem.addProduct("PB01", "Shorts", "Pants", 25, "M", "Black");
-    }
+	    inventorySystem.addProduct("PT01", "T-Shirt", "Tops", 50, "M", "Red", "lib/images/PT01.png");
+	    inventorySystem.addProduct("PT02", "Polo", "Tops", 30, "L", "Red", "lib/images/PT02.png");
+	    inventorySystem.addProduct("PT03", "Blouse", "Tops", 20, "S", "White", "lib/images/PT03.png");
+	    inventorySystem.addProduct("PB01", "Shorts", "Pants", 25, "M", "Black", "lib/images/PB01.png");
+	}
 
     public static void showLoginScreen() {
         // Create the login frame
