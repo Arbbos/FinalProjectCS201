@@ -523,31 +523,46 @@ public class Main {
     }
 
     private static void refreshProductDisplay(JPanel mainPanel) {
-    	mainPanel.removeAll();
-        for (InventorySystem.ProductTracker product : inventorySystem.getProducts()) {
-            JPanel productPanel = new JPanel(new BorderLayout());
-            JLabel nameLabel = new JLabel(product.getName() + " - Stock: " + product.getStockLevel());
-            JLabel idLabel = new JLabel("ID: " + product.getProductID(), SwingConstants.CENTER);
-            JButton detailsButton = new JButton("Details");
+    mainPanel.removeAll();
+    for (InventorySystem.ProductTracker product : inventorySystem.getProducts()) {
+        JPanel productPanel = new JPanel(new BorderLayout());
 
-            detailsButton.addActionListener(e -> {
-                String details = "Product ID: " + product.getProductID() +
-                                 "\nName: " + product.getName() +
-                                 "\nCategory: " + product.getCategory() +
-                                 "\nStock: " + product.getStockLevel() +
-                                 "\nSize: " + product.getSize() +
-                                 "\nColor: " + product.getColor();
-                JOptionPane.showMessageDialog(mainPanel, details, "Product Details", JOptionPane.INFORMATION_MESSAGE);
-            });
+        // Get the image path based on the product ID
+        String imagePath = getProductImagePath(product.getProductID());
+        ImageIcon productImage = new ImageIcon(imagePath); // Load the image
 
-            productPanel.add(nameLabel, BorderLayout.NORTH);
-            productPanel.add(idLabel, BorderLayout.CENTER);
-            productPanel.add(detailsButton, BorderLayout.SOUTH);
-            mainPanel.add(productPanel);
-        }
-        mainPanel.revalidate();
-        mainPanel.repaint();
+        // Resize the image if needed (e.g., 100x100 px)
+        ImageIcon resizedImage = new ImageIcon(productImage.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH));
+        JLabel imageLabel = new JLabel(resizedImage); // Set the resized image to the label
+
+        // Product details
+        JLabel nameLabel = new JLabel(product.getName() + " - Stock: " + product.getStockLevel());
+        JLabel idLabel = new JLabel("ID: " + product.getProductID(), SwingConstants.CENTER);
+        JButton detailsButton = new JButton("Details");
+
+        // Action for the details button
+        detailsButton.addActionListener(e -> {
+            String details = "Product ID: " + product.getProductID() +
+                             "\nName: " + product.getName() +
+                             "\nCategory: " + product.getCategory() +
+                             "\nStock: " + product.getStockLevel() +
+                             "\nSize: " + product.getSize() +
+                             "\nColor: " + product.getColor();
+            JOptionPane.showMessageDialog(mainPanel, details, "Product Details", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        // Add the image, name, and other details to the product panel
+        productPanel.add(imageLabel, BorderLayout.NORTH);  // Display the image at the top
+        productPanel.add(nameLabel, BorderLayout.CENTER);
+        productPanel.add(idLabel, BorderLayout.SOUTH);
+        productPanel.add(detailsButton, BorderLayout.SOUTH);
+        
+        // Add the product panel to the main panel
+        mainPanel.add(productPanel);
     }
+    mainPanel.revalidate();
+    mainPanel.repaint();
+}
 
     private static void searchProducts(JPanel mainPanel, String input) {
         mainPanel.removeAll();
@@ -567,46 +582,41 @@ public class Main {
     }
 
     private static void addProductToPanel(JPanel mainPanel, InventorySystem.ProductTracker product) {
-        JPanel productPanel = new JPanel(new BorderLayout());
-        
-        // Map product IDs to image file names (or set up logic to load specific images)
-        String imagePath = getProductImagePath(product.getProductID()); // Get image path based on product ID
-        ImageIcon productImage = new ImageIcon(imagePath); // Load the image
-        
-        // Check if the image path is valid and the image is loaded
-        if (productImage.getImageLoadStatus() != MediaTracker.COMPLETE) {
-            System.err.println("Image failed to load: " + imagePath);
-        }
-        
-        // Resize the image if needed (e.g., 100x100 px)
-        ImageIcon resizedImage = new ImageIcon(productImage.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH));
-        JLabel imageLabel = new JLabel(resizedImage); // Set the resized image to the label
-        
-        // Product details
-        JLabel nameLabel = new JLabel(product.getName() + " - Stock: " + product.getStockLevel());
-        JLabel idLabel = new JLabel("ID: " + product.getProductID(), SwingConstants.CENTER);
-        JButton detailsButton = new JButton("Details");
-        
-        // Action for the details button
-        detailsButton.addActionListener(e -> {
-            String details = "Product ID: " + product.getProductID() +
-                             "\nName: " + product.getName() +
-                             "\nCategory: " + product.getCategory() +
-                             "\nStock: " + product.getStockLevel() +
-                             "\nSize: " + product.getSize() +
-                             "\nColor: " + product.getColor();
-            JOptionPane.showMessageDialog(mainPanel, details, "Product Details", JOptionPane.INFORMATION_MESSAGE);
-        });
-        
-        // Add the image, name, and other details to the product panel
-        productPanel.add(imageLabel, BorderLayout.NORTH);  // Display the image at the top
-        productPanel.add(nameLabel, BorderLayout.CENTER);
-        productPanel.add(idLabel, BorderLayout.SOUTH);
-        productPanel.add(detailsButton, BorderLayout.SOUTH);
-        
-        // Add the product panel to the main panel
-        mainPanel.add(productPanel);
-    }
+    JPanel productPanel = new JPanel(new BorderLayout());
+    
+    // Get the image path based on the product ID
+    String imagePath = getProductImagePath(product.getProductID());
+    ImageIcon productImage = new ImageIcon(imagePath); // Load the image
+
+    // Resize the image if needed (e.g., 100x100 px)
+    ImageIcon resizedImage = new ImageIcon(productImage.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH));
+    JLabel imageLabel = new JLabel(resizedImage); // Set the resized image to the label
+
+    // Product details
+    JLabel nameLabel = new JLabel(product.getName() + " - Stock: " + product.getStockLevel());
+    JLabel idLabel = new JLabel("ID: " + product.getProductID(), SwingConstants.CENTER);
+    JButton detailsButton = new JButton("Details");
+    
+    // Action for the details button
+    detailsButton.addActionListener(e -> {
+        String details = "Product ID: " + product.getProductID() +
+                         "\nName: " + product.getName() +
+                         "\nCategory: " + product.getCategory() +
+                         "\nStock: " + product.getStockLevel() +
+                         "\nSize: " + product.getSize() +
+                         "\nColor: " + product.getColor();
+        JOptionPane.showMessageDialog(mainPanel, details, "Product Details", JOptionPane.INFORMATION_MESSAGE);
+    });
+
+    // Add the image, name, and other details to the product panel
+    productPanel.add(imageLabel, BorderLayout.NORTH);  // Display the image at the top
+    productPanel.add(nameLabel, BorderLayout.CENTER);
+    productPanel.add(idLabel, BorderLayout.SOUTH);
+    productPanel.add(detailsButton, BorderLayout.SOUTH);
+    
+    // Add the product panel to the main panel
+    mainPanel.add(productPanel);
+}
     
     private static String getProductImagePath(String productID) {
         // This function returns a specific image path based on the product ID
@@ -619,7 +629,7 @@ public class Main {
                 return "lib/images/PT03.png";  // Path to image for PT03
             // Add more cases for other products...
             default:
-                return "lib/images/default_image.png"; // Default image if no specific image is found
+                return "lib/images/PT01.png"; // Default image if no specific image is found
         }
     }    
     
