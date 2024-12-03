@@ -396,6 +396,84 @@ public class Main {
         mainPanel.repaint();
     }
 
+    // Method to open the dialog for adding a new product
+    private static void openAddProductDialog(JFrame frame) {
+        JDialog dialog = new JDialog(frame, "Add New Product", true);
+        dialog.setSize(400, 400);
+        dialog.setLayout(new GridLayout(7, 2));
+        dialog.setLocationRelativeTo(frame);
+    
+        // Create form fields for product details
+        JLabel idLabel = new JLabel("Product ID:");
+        idLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));  // Padding for the label
+        JTextField idField = new JTextField();
+
+        JLabel nameLabel = new JLabel("Product Name:");
+        nameLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // Padding for the label
+        JTextField nameField = new JTextField();
+
+        JLabel categoryLabel = new JLabel("Category:");
+        categoryLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // Padding for the label
+        JTextField categoryField = new JTextField();
+
+        JLabel stockLabel = new JLabel("Stock Level:");
+        stockLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // Padding for the label
+        JTextField stockField = new JTextField();
+
+        JLabel sizeLabel = new JLabel("Size:");
+        sizeLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // Padding for the label
+        JTextField sizeField = new JTextField();
+
+        JLabel colorLabel = new JLabel("Color:");
+        colorLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // Padding for the label
+        JTextField colorField = new JTextField();
+
+        // Button to save product
+        JButton saveButton = new JButton("Save Product");
+        saveButton.setBackground(new Color(0x233c4b));  // Set button color to #233c4b
+        saveButton.setForeground(Color.WHITE);  // Set text color to white
+        saveButton.addActionListener(e -> {
+            String productID = idField.getText();
+            String name = nameField.getText();
+            String category = categoryField.getText();
+            String stockText = stockField.getText();
+            String size = sizeField.getText();
+            String color = colorField.getText();
+    
+            // Validate inputs (you can expand validation as needed)
+            if (productID.isEmpty() || name.isEmpty() || category.isEmpty() || stockText.isEmpty() || size.isEmpty() || color.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+                try {
+                    int stockLevel = Integer.parseInt(stockText);
+    
+                    // Assuming you have an instance of InventorySystem to add the product
+                    inventorySystem.addProduct(productID, name, category, stockLevel, size, color);
+    
+                    dialog.dispose();  // Close the dialog
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(dialog, "Invalid stock level.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+    
+        dialog.add(idLabel);
+        dialog.add(idField);
+        dialog.add(nameLabel);
+        dialog.add(nameField);
+        dialog.add(categoryLabel);
+        dialog.add(categoryField);
+        dialog.add(stockLabel);
+        dialog.add(stockField);
+        dialog.add(sizeLabel);
+        dialog.add(sizeField);
+        dialog.add(colorLabel);
+        dialog.add(colorField);
+        dialog.add(saveButton);
+    
+        dialog.setVisible(true);
+    }
+
     private static void searchProducts(JPanel mainPanel, String input) {
         mainPanel.removeAll();
         List<InventorySystem.ProductTracker> filteredProducts = inventorySystem.searchProducts(input);
