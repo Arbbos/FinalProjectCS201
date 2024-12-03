@@ -476,7 +476,8 @@ public class Main {
 
     private static void searchProducts(JPanel mainPanel, String input) {
         mainPanel.removeAll();
-        List<InventorySystem.ProductTracker> filteredProducts = inventorySystem.searchProducts(input);
+        InventorySystem.ProductTracker productInfoByID = inventorySystem.getProductByID(input);
+        InventorySystem.ProductTracker productInfoByName = inventorySystem.getProductByName(input);
         String[] columnNames = {"Product ID", "Name", "Category", "Stock Level", "Size", "Color"};
         Object[][] data = new Object[filteredProducts.size()][6];
 
