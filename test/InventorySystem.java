@@ -22,7 +22,6 @@ public class InventorySystem {
         private String color;
         private String category;
         private String location;
-        private String imagePath;
 
         public ProductTracker(String productID, String name, String category, int stockLevel, String size, String color) {
             this.productID = productID;
@@ -32,13 +31,8 @@ public class InventorySystem {
             this.color = color;
             this.category = category;
             this.location = determineLocation(category);
-            this.imagePath = imagePath;
         }
 
-        public String getImagePath() {
-            return imagePath;
-        }
-        
         private String determineLocation(String category) {
             switch (category.toLowerCase()) {
                 case "tops":
@@ -100,13 +94,13 @@ public class InventorySystem {
     private HashMap<String, ProductTracker> products = new HashMap<>();
 
     // Method to add a product to the inventory
-    public void addProduct(String productID, String name, String category, int stockLevel, String size, String color, String imagePath) {
+    public void addProduct(String productID, String name, String category, int stockLevel, String size, String color) {
         if (products.containsKey(productID)) {
             System.out.println("Product with ID " + productID + " already exists.");
             return;
         }
 
-        ProductTracker product = new ProductTracker(productID, name, category, stockLevel, size, color, imagePath);
+        ProductTracker product = new ProductTracker(productID, name, category, stockLevel, size, color);
         products.put(productID, product);
     }
 
@@ -129,11 +123,5 @@ public class InventorySystem {
     public Collection<ProductTracker> getProducts() {
         return products.values();
     }
-
-    private static String getProductImagePath(String productID) {
-    InventorySystem.ProductTracker product = inventorySystem.getProductByID(productID);
-    return product != null ? product.getImagePath() : "lib/images/default_image.png"; // Default image if not found
-}
        
 }
-
