@@ -94,7 +94,7 @@ public class InventorySystem {
     private HashMap<String, ProductTracker> products = new HashMap<>();
 
     // Method to add a product to the inventory
-    public void addProduct(String productID, String name, String category, int stockLevel, String size, String color) {
+    public void addProduct(String productID, String name, String category, int stockLevel, String size, String color, String location) {
         if (products.containsKey(productID)) {
             System.out.println("Product with ID " + productID + " already exists.");
             return;
@@ -104,27 +104,20 @@ public class InventorySystem {
         products.put(productID, product);
     }
 
-    // Retrieve a product by its ID (case insensitive and partial match)
-public List<ProductTracker> getProductByID(String productID) {
-    List<ProductTracker> matchingProducts = new ArrayList<>();
-    for (ProductTracker product : products.values()) {
-        if (product.getProductID().toLowerCase().contains(productID.toLowerCase())) {
-            matchingProducts.add(product);
-        }
+    // Retrieve a product by its ID
+    public ProductTracker getProductByID(String productID) {
+        return products.get(productID);
     }
-    return matchingProducts;
-}
 
-// Retrieve a product by its name (case insensitive and partial match)
-public List<ProductTracker> getProductByName(String name) {
-    List<ProductTracker> matchingProducts = new ArrayList<>();
-    for (ProductTracker product : products.values()) {
-        if (product.getName().toLowerCase().contains(name.toLowerCase())) {
-            matchingProducts.add(product);
+    // Retrieve a product by its name
+    public ProductTracker getProductByName(String name) {
+        for (ProductTracker product : products.values()) {
+            if (product.getName().equalsIgnoreCase(name)) {
+                return product;
+            }
         }
+        return null;
     }
-    return matchingProducts;
-}
 
     // Get all products
     public Collection<ProductTracker> getProducts() {
